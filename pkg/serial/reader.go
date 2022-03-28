@@ -3,10 +3,12 @@ package serial
 import (
 	"bufio"
 	"fmt"
-	"github.com/tarm/serial"
 	"log"
 	"regexp"
 	"strconv"
+	"time"
+
+	"github.com/tarm/serial"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -62,36 +64,42 @@ func findNamedMatches(regex *regexp.Regexp, str string) map[string]string {
 func Read() {
 	Config.Parity = serial.ParityNone
 	Config.StopBits = serial.Stop1
-	s, err := serial.OpenPort(Config)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	scanner := bufio.NewScanner(s)
-	// optionally, resize scanner's capacity for lines over 64K, see next example
-	for scanner.Scan() {
-		fmt.Println(scanner.Text())
-		re := regexp.MustCompile(`(?P<date>[a-zA-Z0-9\-]+)\s+(?P<time>[0-9:]+)\s+(?P<SpO2>\d+)\s+(?P<BPM>\d+)\s+(?P<PA>\d+)(?P<Status>.*)`)
-		//match := re.FindStringSubmatch(scanner.Text())
-
-		matches := findNamedMatches(re, scanner.Text())
-		if matches != nil {
-			if s, err := strconv.ParseFloat(matches["SpO2"], 64); err == nil {
-				spo2.Set(s)
-			}
-			if s, err := strconv.ParseFloat(matches["BPM"], 64); err == nil {
-				bpm.Set(s)
-			}
-
-			if s, err := strconv.ParseFloat(matches["PA"], 64); err == nil {
-				pa.Set(s)
-			}
+	Config.ReadTimeout = time.Second * 5
+	for {
+		s, err := serial.OpenPort(Config)
+		if err != nil {
+			log.Fatal(err)
+			time.Sleep(time.Second * 5)
+			continue
 		}
 
-	}
+		scanner := bufio.NewScanner(s)
+		for scanner.Scan() {
+			fmt.Println(scanner.Text())
+			re := regexp.MustCompile(`(?P<date>[a-zA-Z0-9\-]+)\s+(?P<time>[0-9:]+)\s+(?P<SpO2>\d+)\s+(?P<BPM>\d+)\s+(?P<PA>\d+)(?P<Status>.*)`)
 
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
+			matches := findNamedMatches(re, scanner.Text())
+			if matches != nil {
+				if s, err := strconv.ParseFloat(matches["SpO2"], 64); err == nil {
+					spo2.Set(s)
+				}
+				if s, err := strconv.ParseFloat(matches["BPM"], 64); err == nil {
+					bpm.Set(s)
+				}
+
+				if s, err := strconv.ParseFloat(matches["PA"], 64); err == nil {
+					pa.Set(s)
+				}
+			}
+
+		}
+
+		if err := scanner.Err(); err != nil {
+			log.Fatal(err)
+			spo2.Set(0)
+			bpm.Set(0)
+			pa.Set(0)
+		}
 	}
 
 }
