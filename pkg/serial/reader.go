@@ -3,7 +3,6 @@ package serial
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"regexp"
 	"strconv"
 	"time"
@@ -68,7 +67,10 @@ func Read() {
 	for {
 		s, err := serial.OpenPort(Config)
 		if err != nil {
-			log.Fatal(err)
+			fmt.Printf("%v\n", err)
+			spo2.Set(0)
+			bpm.Set(0)
+			pa.Set(0)
 			time.Sleep(time.Second * 5)
 			continue
 		}
@@ -95,7 +97,7 @@ func Read() {
 		}
 
 		if err := scanner.Err(); err != nil {
-			log.Fatal(err)
+			fmt.Printf("%v\n", err)
 			spo2.Set(0)
 			bpm.Set(0)
 			pa.Set(0)
