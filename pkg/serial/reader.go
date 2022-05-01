@@ -78,7 +78,7 @@ func Read() {
 		scanner := bufio.NewScanner(s)
 		for scanner.Scan() {
 			fmt.Println(scanner.Text())
-			re := regexp.MustCompile(`(?P<date>[a-zA-Z0-9\-]+)\s+(?P<time>[0-9:]+)\s+(?P<SpO2>\d+)\s+(?P<BPM>\d+)\s+(?P<PA>\d+)(?P<Status>.*)`)
+			re := regexp.MustCompile(`(?P<date>[a-zA-Z0-9\-]+)\s+(?P<time>[0-9:]+)\s+(?P<SpO2>\d+)(\*)?\s+(?P<BPM>\d+)(\*)?\s+(?P<PA>\d+)(?P<Status>.*)`)
 
 			matches := findNamedMatches(re, scanner.Text())
 			if matches != nil {
