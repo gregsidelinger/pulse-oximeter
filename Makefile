@@ -2,10 +2,10 @@ CCARMV7=arm-linux-gnueabihf-gcc
 CCARM64=aarch64-linux-gnu-gcc
 
 all: mod
-	@echo "Building"
 
 mod:
-	go mod tity
+	@echo "Running go mod tidy"
+	go mod tidy
 
 386: 
 	@echo "Building 386"
@@ -43,6 +43,15 @@ build:
 	@echo "Building pulse-oximeter"
 	mkdir -p bin
 
+install:
+	cp bin/pulse-oximeter.linux.arm64 /usr/local/bin/pulse-oximeter
+	chmod 755 /usr/local/bin/pulse-oximeter
+
+systemd:
+	cp deply/pulse-oximeter.service /etc/systemd/system/pulse-oximeter.service
+	chmod 644 /etc/systemd/system/pulse-oximeter.service
+	systemctl daemon-reload 
+	systemctl enable pulse-oximeter.service
 
 package: pulse-oximeter
 	@echo "Packaging"

@@ -1,0 +1,12 @@
+[Unit]
+Description=Puslse Oximeter
+After=network.target
+
+[Service]
+Restart=always
+Type=simple
+
+ExecStart=pulse-oximeter monitor -d /dev/ttyUSB0
+
+[Install]
+WantedBy=multi-user.target

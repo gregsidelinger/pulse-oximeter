@@ -18,11 +18,10 @@ package cmd
 import (
 	"fmt"
 	"log"
-	"strconv"
 	"net/http"
 
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/gregsidelinger/pulse-oximeter/pkg/serial"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/spf13/cobra"
 )
@@ -37,19 +36,16 @@ Push to promometheous
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("monitor called")
 
-
-
 		serial.Config.Name = cmd.Flag("device").Value.String()
-		buadRate, err := strconv.Atoi(cmd.Flag("baud-rate").Value.String())
+		buadRate, err := cmd.Flags().GetInt("baud-rate")
 		if err != nil {
 			log.Fatal(err)
-
 		}
 		serial.Config.Baud = buadRate
 		go serial.Read()
-        
-http.Handle("/metrics", promhttp.Handler())
-        http.ListenAndServe(":9100", nil)
+
+		http.Handle("/metrics", promhttp.Handler())
+		http.ListenAndServe(":9100", nil)
 	},
 }
 

@@ -9,46 +9,10 @@ import (
 
 	"github.com/tarm/serial"
 
-	"github.com/prometheus/client_golang/prometheus"
+	po "github.com/gregsidelinger/pulse-oximeter/pkg/pulse-oximeter"
 )
 
 var Config = &serial.Config{}
-
-var (
-	spo2 = prometheus.NewGauge(prometheus.GaugeOpts{
-		//Namespace: "our_company",
-		//Subsystem: "blob_storage",
-		Name: "spo2",
-		Help: "o2 Percentage",
-	})
-
-	bpm = prometheus.NewGauge(prometheus.GaugeOpts{
-		//Namespace: "our_company",
-		//Subsystem: "blob_storage",
-		Name: "bpm",
-		Help: "beats per minite",
-	})
-
-	pa = prometheus.NewGauge(prometheus.GaugeOpts{
-		//Namespace: "our_company",
-		//Subsystem: "blob_storage",
-		Name: "pa",
-		Help: "pa",
-	})
-
-	status = prometheus.NewGauge(prometheus.GaugeOpts{
-		//Namespace: "our_company",
-		//Subsystem: "blob_storage",
-		Name: "status",
-		Help: "status",
-	})
-)
-
-func init() {
-	prometheus.MustRegister(spo2)
-	prometheus.MustRegister(bpm)
-	prometheus.MustRegister(pa)
-}
 
 func findNamedMatches(regex *regexp.Regexp, str string) map[string]string {
 	match := regex.FindStringSubmatch(str)
@@ -68,9 +32,9 @@ func Read() {
 		s, err := serial.OpenPort(Config)
 		if err != nil {
 			fmt.Printf("%v\n", err)
-			spo2.Set(0)
-			bpm.Set(0)
-			pa.Set(0)
+			po.Spo2.Set(0)
+			po.Bpm.Set(0)
+			po.Pa.Set(0)
 			time.Sleep(time.Second * 5)
 			continue
 		}
@@ -83,14 +47,14 @@ func Read() {
 			matches := findNamedMatches(re, scanner.Text())
 			if matches != nil {
 				if s, err := strconv.ParseFloat(matches["SpO2"], 64); err == nil {
-					spo2.Set(s)
+					po.Spo2.Set(s)
 				}
 				if s, err := strconv.ParseFloat(matches["BPM"], 64); err == nil {
-					bpm.Set(s)
+					po.Bpm.Set(s)
 				}
 
 				if s, err := strconv.ParseFloat(matches["PA"], 64); err == nil {
-					pa.Set(s)
+					po.Pa.Set(s)
 				}
 			}
 
@@ -98,9 +62,9 @@ func Read() {
 
 		if err := scanner.Err(); err != nil {
 			fmt.Printf("%v\n", err)
-			spo2.Set(0)
-			bpm.Set(0)
-			pa.Set(0)
+			po.Spo2.Set(0)
+			po.Bpm.Set(0)
+			po.Pa.Set(0)
 		}
 	}
 
