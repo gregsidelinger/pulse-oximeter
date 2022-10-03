@@ -13,7 +13,7 @@ mod:
 
 amd64:
 	@echo "Building amd64"
-	GO111MODULE=on GOOS=linux GOARCH=amd64 go build -o bin/pulse-oximeter.linux.amd64 main.go
+	GO111MODULE=on CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o bin/pulse-oximeter.linux.amd64 main.go
 
 arm5:
 	@echo "Building arm5"
