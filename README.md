@@ -29,8 +29,8 @@ WantedBy=multi-user.target
 
 
 
-```
-piVersion: v1
+```yaml
+apiVersion: v1
 kind: Service
 metadata:
   labels:
@@ -48,7 +48,7 @@ spec:
 ```
 
 
-```
+```yaml
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
