@@ -17,13 +17,13 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gregsidelinger/pulse-oximeter/pkg/serial"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // monitorCmd represents the monitor command
@@ -36,12 +36,12 @@ Push to promometheous
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("monitor called")
 
-		serial.Config.Name = cmd.Flag("device").Value.String()
-		buadRate, err := cmd.Flags().GetInt("baud-rate")
-		if err != nil {
-			log.Fatal(err)
-		}
-		serial.Config.Baud = buadRate
+		serial.Config.Name = viper.GetString("monitor.device")
+		serial.Config.Baud = viper.GetInt("monitor.baud-rate")
+
+		fmt.Println("baud-rate: ", serial.Config.Baud)
+		fmt.Println("device: ", serial.Config.Name)
+
 		go serial.Read()
 
 		http.Handle("/metrics", promhttp.Handler())
@@ -63,7 +63,9 @@ func init() {
 	// monitorCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 	monitorCmd.Flags().StringP("device", "d", "/dev/ttyUSB0", "Serial Device")
-	monitorCmd.Flags().Int("baud-rate", 115200, "Serial Baud Rate")
+	viper.BindPFlag("monitor.device", monitorCmd.Flags().Lookup("device"))
+	monitorCmd.Flags().Int("baud-rate", 19200, "Serial Baud Rate")
+	viper.BindPFlag("monitor.baud-rate", monitorCmd.Flags().Lookup("baud-rate"))
 
 	monitorCmd.Flags().StringP("push-gateway", "p", "", "Push gateway URL")
 

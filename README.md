@@ -28,6 +28,16 @@ WantedBy=multi-user.target
 ```
 
 
+Example config file
+~/.pulse-oximeter.yaml
+```yaml
+---
+monitor:
+  device: /dev/ttyUSB0
+  baud-rate: 19022
+```
+
+
 
 ```yaml
 apiVersion: v1
